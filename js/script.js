@@ -1,4 +1,5 @@
 var map;
+let db = new PouchDB('markers');
 
 
 // valores posibles Longitud -180 < x < 180 ; Latitud -90 < y < 90 ]
@@ -15,6 +16,24 @@ const addMarkerWithClick = position => {
         position,
         map
     });
+    marker.addListener("dblclick", evt => {
+        marker.setMap(null);
+        removeMarker(evt);
+    });
+    saveOnDatabase(marker);
+}
+
+const removeMarker = evt => {
+    db.allDocs({include_docs: true, descending: false})
+        .then(docs => {
+            docs.rows.forEach(row => {
+                let doc = row.doc;
+                if(doc.lat == evt.latLng.lat()){
+                    db.remove(doc);
+                    M.toast({html: 'Marcador eliminado'})
+                }
+            });
+        })
 }
 
 const addMarker = e => {
@@ -35,12 +54,17 @@ const addMarker = e => {
             },
             map
         });
-        M.toast({html: 'Marcador agregado'});
         btnSearch.className = 'modal-close';
+        marker.addListener("dblclick", evt => {
+            marker.setMap(null);
+            removeMarker(evt);
+        });
+        saveOnDatabase(marker);
     }
     else
         M.toast({html: 'Verificar datos del formulario'});
 }
+
 
 function initMap() {
     let position = { 
@@ -61,6 +85,14 @@ function initMap() {
         position,
         map
     });
+
+    marker.addListener("dblclick", evt => {
+        marker.setMap(null);
+        removeMarker(evt);
+    });
+
+    readDatabase();
+
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -73,8 +105,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let btnSearch = document.querySelector('#btnSearch');
     btnSearch.addEventListener('click', addMarker);
-
+    
 });
 
+const saveOnDatabase = marker => {
+    let markerToSave = {
+        _id: new Date().toISOString(),
+        lat: marker.position.lat(),
+        lng: marker.position.lng()
+    }
+    db.put(markerToSave)
+        .then(M.toast({html: 'Marcador agregado'}))
+}
 
+const readDatabase = () => {
+    db.allDocs({include_docs: true, descending: false})
+        .then(docs => addMarkersToList(docs.rows))
+}
+
+const addMarkersToList = list => {
+    list.forEach(element => {
+        let marker = new google.maps.Marker({
+            position: {
+                lat: element.doc.lat,
+                lng: element.doc.lng
+            },
+            map
+        });
+        marker.addListener("dblclick", evt => {
+            marker.setMap(null);
+            removeMarker(evt);
+        });
+    });
+}
 
