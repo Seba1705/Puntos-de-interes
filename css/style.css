@@ -1,0 +1,71 @@
+body, html {
+    padding: 0;
+    margin: 0;
+    background: #fff;
+}
+
+#map {
+    position: absolute;
+    height: 500px;
+    background: #f2f2f2;
+    width: 100%;
+    bottom: 0;
+}
+
+#btnOpenSearch {
+    margin: 30px !important;
+}
+
+.dropdown-content li>span {
+    color: #0d47a1 !important;
+  }
+  
+  .dropdown-content li>a {
+    color: #0d47a1 !important;
+  }
+  
+  .select-content li>span {
+    color: #0d47a1 !important;
+  }
+  
+  .select-content li>a {
+    color: #0d47a1 !important;
+  }
+
+/* icon prefix focus color */
+.input-field .prefix.active {
+    color: #0d47a1;
+}
+
+/* label focus color */
+.input-field input:focus + label {
+    color: #0d47a1 !important;
+}
+/* label underline focus color */
+.row .input-field input:focus {
+    border-bottom: 1px solid #0d47a1 !important;
+    box-shadow: 0 1px 0 0 #0d47a1 !important
+}
+
+.animated {
+    -webkit-animation-duration: 1s;
+    animation-duration: 1s;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+}
+
+  .fast {
+      -webkit-animation-duration: 0.4s;
+      animation-duration: 0.4s;
+      -webkit-animation-fill-mode: both;
+      animation-fill-mode: both;
+  }
+
+  @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+  }
+  
+  .fadeIn { animation-name: fadeIn; }
+
+ 
