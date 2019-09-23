@@ -53,11 +53,11 @@ const addMarker = e => {
     let lat = +coords[0],
         lng = +coords[1];
 
-    let info = `<p><strong>Description:</strong> ${name}</p>
+    let info = `<p><strong>Descripci&oacuten:</strong> ${name}</p>
                 <p><strong>Direcci&oacuten:</strong> ${address}</p>
                 <p><strong>Tel&eacutefono:</strong> ${phone}</p>
                 <p><strong>(X , Y):</strong> ${lat}, ${lng}</p>
-                <p><strong>Categor&eacutea:</strong> ${category}</p>`;
+                <p><strong>Categor&iacutea:</strong> ${category}</p>`;
 
     if(validateLatAndLong(lat, lng) && validateString(name, address)){
         let infowindow = new google.maps.InfoWindow({
