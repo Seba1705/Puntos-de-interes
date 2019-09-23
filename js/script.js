@@ -7,28 +7,33 @@ const validateLatAndLong = (lat, lng) => {
     return (lat > -180 && lat < 180 && lng > -90 && lng < 90) ? true : false;
 }
 
-const validateString = (name, address, phone) => {
-    return (name.length > 3, address.length > 3, phone.length > 3) ? true : false;
+const validateString = (name, address) => {
+    return (name.length > 3, address.length > 3) ? true : false;
 }
 
+// Agrega marcador con un click
 const addMarkerWithClick = position => {
     let marker = new google.maps.Marker({
         position,
-        map
+        map,
+        title: ''
     });
+
     marker.addListener("dblclick", evt => {
         marker.setMap(null);
         removeMarker(evt);
     });
+
     saveOnDatabase(marker);
 }
 
+// Eliminar marcador con doble click
 const removeMarker = evt => {
     db.allDocs({include_docs: true, descending: false})
         .then(docs => {
             docs.rows.forEach(row => {
                 let doc = row.doc;
-                if(doc.lat == evt.latLng.lat()){
+                if(doc.lat == evt.latLng.lat() && doc.lng == evt.latLng.lng()){
                     db.remove(doc);
                     M.toast({html: 'Marcador eliminado'})
                 }
@@ -36,6 +41,7 @@ const removeMarker = evt => {
         })
 }
 
+// Agregar marcador desde formulario
 const addMarker = e => {
     e.preventDefault();
     let name = document.querySelector('#name').value,
@@ -47,52 +53,71 @@ const addMarker = e => {
     let lat = +coords[0],
         lng = +coords[1];
 
-    if(validateLatAndLong(lat, lng) && validateString(name, address, phone)){
+    let info = `<p><strong>Description:</strong> ${name}</p>
+                <p><strong>Direcci&oacuten:</strong> ${address}</p>
+                <p><strong>Tel&eacutefono:</strong> ${phone}</p>
+                <p><strong>(X , Y):</strong> ${lat}, ${lng}</p>
+                <p><strong>Categor&eacutea:</strong> ${category}</p>`;
+
+    if(validateLatAndLong(lat, lng) && validateString(name, address)){
+        let infowindow = new google.maps.InfoWindow({
+            content: info
+        });
+
         let marker = new google.maps.Marker({
             position: {
                 lat, lng
             },
-            map
+            map,
+            title: info
         });
-        btnSearch.className = 'modal-close';
+
         marker.addListener("dblclick", evt => {
             marker.setMap(null);
             removeMarker(evt);
         });
+
+        marker.addListener('click', () => {
+            infowindow.open(map, marker);
+        });
+
         saveOnDatabase(marker);
+
+        btnSearch.className = 'modal-close';
     }
     else
         M.toast({html: 'Verificar datos del formulario'});
 }
 
-
+// Iniciar mapa
 function initMap() {
-    let position = { 
-        lat: -34.595986, 
-        lng: -58.3724715
-    }
+    navigator.geolocation.getCurrentPosition(location => {
+        let position = { 
+            lat: location.coords.latitude, 
+            lng: location.coords.longitude
+        }
+        
+        let options = {
+            center: position,
+            zoom: 15
+        }
     
-    let options = {
-        center: position,
-        zoom: 15
-    }
-
-    map = new google.maps.Map(document.getElementById('map'), options);
-
-    map.addListener('click', evt => addMarkerWithClick(evt.latLng));
-
-    let marker = new google.maps.Marker({
-        position,
-        map
+        map = new google.maps.Map(document.getElementById('map'), options);
+    
+        map.addListener('click', evt => addMarkerWithClick(evt.latLng));
+    
+        let marker = new google.maps.Marker({
+            position,
+            map
+        });
+    
+        marker.addListener("dblclick", evt => {
+            marker.setMap(null);
+            removeMarker(evt);
+        });
+    
+        readDatabase();
     });
-
-    marker.addListener("dblclick", evt => {
-        marker.setMap(null);
-        removeMarker(evt);
-    });
-
-    readDatabase();
-
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -108,11 +133,13 @@ document.addEventListener('DOMContentLoaded', () => {
     
 });
 
+// Guardar marcadores en base de datos local
 const saveOnDatabase = marker => {
     let markerToSave = {
         _id: new Date().toISOString(),
         lat: marker.position.lat(),
-        lng: marker.position.lng()
+        lng: marker.position.lng(),
+        info: marker.title
     }
     db.put(markerToSave)
         .then(M.toast({html: 'Marcador agregado'}))
@@ -125,13 +152,23 @@ const readDatabase = () => {
 
 const addMarkersToList = list => {
     list.forEach(element => {
+        let infowindow = new google.maps.InfoWindow({
+            content: element.doc.info
+        });
+
         let marker = new google.maps.Marker({
             position: {
                 lat: element.doc.lat,
                 lng: element.doc.lng
             },
-            map
+            map,
+            title: element.doc.title
         });
+
+        marker.addListener('click', () => {
+            infowindow.open(map, marker);
+        });
+
         marker.addListener("dblclick", evt => {
             marker.setMap(null);
             removeMarker(evt);
