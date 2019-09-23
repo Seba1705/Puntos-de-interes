@@ -9,6 +9,6 @@ El formulario agrega los marcadores en las coordenadas especificadas.
 
 Se agrega también un marcador al hacer un click en el mapa.
 
-Para eliminar un markador presione doble click.
+Para eliminar un marcador presione doble click.
 
-
+Puede probar la aplicacion desde el siguiente link: https://puntos-de-interes.netlify.com/
